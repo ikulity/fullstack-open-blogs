@@ -1,3 +1,4 @@
+const { expect } = require('@jest/globals')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
@@ -57,7 +58,12 @@ describe('adding a post', () => {
         title: "TDD harms architecture",
         author: "Robert C. Martin",
         url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-        likes: 0,
+        likes: 0
+    }
+    const blogWithNolikes = {
+        title: "TDD harms architecture",
+        author: "Robert C. Martin",
+        url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html"
     }
     test('the length of the collection should increment and response should include the new blog', async () => {
         const response = await api.post('/api/blogs').send(newBlog)
@@ -67,6 +73,12 @@ describe('adding a post', () => {
         const allBlogs = await api.get('/api/blogs')
         expect(allBlogs.body).toHaveLength(initialBlogs.length + 1)
     })
+
+    test('if "likes" property is missing it defaults to 0', async () => {
+        const response = await api.post('/api/blogs').send(blogWithNolikes)
+        expect(response.body.likes).toBe(0)
+    })
+
 })
 
 
