@@ -23,20 +23,34 @@ const mostBlogs = (blogs) => {
             if (authorObject.author === authorName) {
                 isFound = true
                 authorObject.blogs += 1
-                console.log(`Author ${authorName} was found! New blog count is ${authorObject.blogs}`)
             }
         })
         if (!isFound) {
             authors = authors.concat({ author: authorName, blogs: 1 })
-            console.log(`Author ${authorName} was not recorded, created a new object`)
-            console.log('Heres the new authors list:', authors)
-        } else {
-            console.log(`Author ${authorName} was recorded, and increment happened!`)
         }
     })
-    console.log("Authors and their blog counts", authors)
     return authors.reduce((prev, current) => {
         return (prev.blogs >= current.blogs) ? prev : current
+    }, 0)
+}
+
+const mostLikes = (blogs) => {
+    let authors = []
+    blogs.forEach(blog => {
+        const authorName = blog.author
+        let isFound = false
+        authors.forEach(authorObject => {
+            if (authorObject.author === authorName) {
+                isFound = true
+                authorObject.likes += blog.likes
+            }
+        })
+        if (!isFound) {
+            authors = authors.concat({ author: authorName, likes: blog.likes })
+        }
+    })
+    return authors.reduce((prev, current) => {
+        return (prev.likes >= current.likes) ? prev : current
     }, 0)
 }
 
@@ -44,5 +58,6 @@ module.exports = {
     dummy,
     totalLikes,
     favoriteBlog,
-    mostBlogs
+    mostBlogs,
+    mostLikes
 }
