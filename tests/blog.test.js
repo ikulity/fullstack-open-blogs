@@ -65,6 +65,9 @@ describe('adding a post', () => {
         author: "Robert C. Martin",
         url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html"
     }
+    const faultyBlog = {
+        author: "Me, myself and I"
+    }
     test('the length of the collection should increment and response should include the new blog', async () => {
         const response = await api.post('/api/blogs').send(newBlog)
         expect(response.body).toMatchObject(newBlog)
@@ -79,6 +82,9 @@ describe('adding a post', () => {
         expect(response.body.likes).toBe(0)
     })
 
+    test('if title or url are not defined, response returns "400 bad request"', async () => {
+        await api.post('/api/blogs').send(faultyBlog).expect(400)
+    })
 })
 
 
