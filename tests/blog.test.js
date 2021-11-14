@@ -1,4 +1,3 @@
-const { expect } = require('@jest/globals')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
@@ -53,7 +52,7 @@ test('a blog post has the property "id"', async () => {
     expect(response.body[0].id).toBeDefined()
 })
 
-describe('adding a post', () => {
+describe('adding a blog', () => {
     const newBlog = {
         title: "TDD harms architecture",
         author: "Robert C. Martin",
@@ -84,6 +83,19 @@ describe('adding a post', () => {
 
     test('if title or url are not defined, response returns "400 bad request"', async () => {
         await api.post('/api/blogs').send(faultyBlog).expect(400)
+    })
+})
+
+describe('deleting a blog', () => {
+    test('returns the deleted blogs data', async () => {
+        // fetch all blogs and pick one id to delete
+        const allBlogs = await api.get('/api/blogs')
+        const blog = allBlogs.body[0]
+
+        // deletion
+        const response = await api.delete(`/api/blogs/${blog.id}`)
+        console.log("RESPONSE BODY", response.body)
+        expect(response.body).toStrictEqual(blog)
     })
 })
 
