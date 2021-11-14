@@ -48,6 +48,12 @@ test('initial notes have length of 3 and they are returned as JSON', async () =>
     expect(response.body).toHaveLength(3)
 })
 
+test('a blog post has the property "id"', async () => {
+    const response = await api.get('/api/blogs')
+    console.log(response.body)
+    expect(response.body[0].id).toBeDefined()
+})
+
 afterAll(() => {
     mongoose.connection.close()
 })
