@@ -1,4 +1,3 @@
-const { beforeEach, afterAll } = require('@jest/globals')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
@@ -45,14 +44,31 @@ test('initial notes have length of 3 and they are returned as JSON', async () =>
     const response = await api.get('/api/blogs')
         .expect(200)
         .expect('Content-Type', /application\/json/)
-    expect(response.body).toHaveLength(3)
+    expect(response.body).toHaveLength(initialBlogs.length)
 })
 
 test('a blog post has the property "id"', async () => {
     const response = await api.get('/api/blogs')
-    console.log(response.body)
     expect(response.body[0].id).toBeDefined()
 })
+
+describe('adding a post', () => {
+    const newBlog = {
+        title: "TDD harms architecture",
+        author: "Robert C. Martin",
+        url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
+        likes: 0,
+    }
+    test('the length of the collection should increment and response should include the new blog', async () => {
+        const response = await api.post('/api/blogs').send(newBlog)
+        expect(response.body).toMatchObject(newBlog)
+
+        // fetch all and check length
+        const allBlogs = await api.get('/api/blogs')
+        expect(allBlogs.body).toHaveLength(initialBlogs.length + 1)
+    })
+})
+
 
 afterAll(() => {
     mongoose.connection.close()
