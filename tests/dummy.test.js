@@ -1,4 +1,3 @@
-const { expect } = require('@jest/globals')
 const listHelper = require('../utils/list_helper')
 
 const blogs = [
