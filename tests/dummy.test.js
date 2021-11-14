@@ -24,3 +24,34 @@ describe('total likes', () => {
         expect(result).toBe(5)
     })
 })
+
+describe('most likes', () => {
+    const listWithMultipleBlogs = [
+        {
+            title: "React patterns",
+            author: "Michael Chan",
+            likes: 7
+        },
+        {
+            title: "Canonical string reduction",
+            author: "Edsger W. Dijkstra",
+            likes: 12
+        },
+        {
+            title: "Go To Statement Considered Harmful",
+            author: "Edsger W. Dijkstra",
+            likes: 5
+        }
+    ]
+
+    test('returns the first blog with the most likes', () => {
+        const result = listHelper.favoriteBlog(listWithMultipleBlogs)
+        expect(result).toEqual(
+            {
+                title: "Canonical string reduction",
+                author: "Edsger W. Dijkstra",
+                likes: 12
+            }
+        )
+    })
+})
