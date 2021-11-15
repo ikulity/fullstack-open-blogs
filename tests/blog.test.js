@@ -94,8 +94,19 @@ describe('deleting a blog', () => {
 
         // deletion
         const response = await api.delete(`/api/blogs/${blog.id}`)
-        console.log("RESPONSE BODY", response.body)
         expect(response.body).toStrictEqual(blog)
+    })
+})
+
+describe('updating a blog', () => {
+    test('updating the likes property should return the blog with new likes count', async () => {
+        // fetch all blogs and pick one id to delete
+        const allBlogs = await api.get('/api/blogs')
+        const blog = allBlogs.body[0]
+
+        const newLikes = { likes: 10 }
+        const response = await api.put(`/api/blogs/${blog.id}`).send(newLikes)
+        expect(response.body).toStrictEqual({ ...blog, ...newLikes })
     })
 })
 
