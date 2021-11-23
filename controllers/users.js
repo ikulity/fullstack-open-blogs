@@ -9,6 +9,8 @@ usersRouter.get('/', async (request, response) => {
 
 usersRouter.post('/', async (request, response) => {
     const body = request.body
+    if (!body.password) throw new Error('Password is required!')
+    if (body.password.length < 3) throw new Error('Password must be at least 3 characters')
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(body.password, saltRounds)
     const user = new User({
@@ -21,6 +23,7 @@ usersRouter.post('/', async (request, response) => {
 })
 
 // these are copied routes from the blogsRouter
+
 // usersRouter.delete('/:id', async (request, response) => {
 //     const id = request.params.id
 //     const result = await User.findByIdAndRemove(id)
