@@ -4,6 +4,9 @@ const app = require('../app')
 
 const api = supertest(app)
 const Blog = require('../models/blog')
+const User = require('../models/user')
+const util = require('util')
+
 const initialBlogs = [
     {
         _id: "5a422a851b54a676234d17f7",
@@ -30,6 +33,29 @@ const initialBlogs = [
         __v: 0
     }
 ]
+const newBlog = {
+    title: "TDD harms architecture",
+    author: "Robert C. Martin",
+    url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
+    likes: 0
+}
+const blogWithNolikes = {
+    title: "TDD harms architecture",
+    author: "Robert C. Martin",
+    url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html"
+}
+const faultyBlog = {
+    author: "Me, myself and I"
+}
+const user = { username: "testUser", password: "test"}
+let token = "";
+beforeAll(async () => {
+    await api.post('/api/users')
+        .send(user)
+    const response = await api.post('/api/login')
+        .send(user)
+    token = response.body.token
+})
 beforeEach(async () => {
     await Blog.deleteMany({})
     let blogObject = new Blog(initialBlogs[0])
@@ -53,22 +79,13 @@ test('a blog post has the property "id"', async () => {
 })
 
 describe('adding a blog', () => {
-    const newBlog = {
-        title: "TDD harms architecture",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-        likes: 0
-    }
-    const blogWithNolikes = {
-        title: "TDD harms architecture",
-        author: "Robert C. Martin",
-        url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html"
-    }
-    const faultyBlog = {
-        author: "Me, myself and I"
-    }
     test('the length of the collection should increment and response should include the new blog', async () => {
-        const response = await api.post('/api/blogs').send(newBlog)
+        const response = await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(201)
+        console.log("body: " + response.body)
         expect(response.body).toMatchObject(newBlog)
 
         // fetch all and check length
@@ -77,24 +94,39 @@ describe('adding a blog', () => {
     })
 
     test('if "likes" property is missing it defaults to 0', async () => {
-        const response = await api.post('/api/blogs').send(blogWithNolikes)
+        const response = await api
+            .post('/api/blogs')
+            .send(blogWithNolikes)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(201)
         expect(response.body.likes).toBe(0)
     })
 
     test('if title or url are not defined, response returns "400 bad request"', async () => {
-        await api.post('/api/blogs').send(faultyBlog).expect(400)
+        await api.post('/api/blogs').send(faultyBlog).set('Authorization', `Bearer ${token}`).expect(400)
+    })
+
+    test('if token is not given, response returns 401', async () => {
+        console.log(util.inspect(newBlog, {colors: true}))
+        await api.post('/api/blogs').send(newBlog).expect(401)
     })
 })
 
 describe('deleting a blog', () => {
     test('returns the deleted blogs data', async () => {
-        // fetch all blogs and pick one id to delete
-        const allBlogs = await api.get('/api/blogs')
-        const blog = allBlogs.body[0]
+        // create blog for test user
+        const createResponse = await api.post('/api/blogs')
+            .send(newBlog)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(201)
+        const blog = createResponse.body
 
         // deletion
-        const response = await api.delete(`/api/blogs/${blog.id}`)
-        expect(response.body).toStrictEqual(blog)
+        const deletionResponse = await api.delete(`/api/blogs/${blog.id}`).set('Authorization', `Bearer ${token}`)
+        expect(deletionResponse.body).toStrictEqual(blog)
+    })
+    test('if token is not given, response returns 401', async () => {
+        await api.delete(`/api/blogs/${initialBlogs[0].id}`).send(newBlog).expect(401)
     })
 })
 

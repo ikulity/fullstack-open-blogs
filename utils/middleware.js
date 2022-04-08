@@ -38,7 +38,12 @@ const tokenExtractor = (req, res, next) => {
 
 const userExtractor = async (req, res, next) => {
     const token = req.token
+    if (!token) {
+        next()
+        return
+    }
     const decodedToken = jwt.verify(token, process.env.SECRET)
+
     if (!decodedToken.id) {
         return res.status(401).json({ error: 'token missing or invalid' })
     }
